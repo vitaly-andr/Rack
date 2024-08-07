@@ -2,6 +2,8 @@
 
 class TimeFormatter
 
+  VALID_FORMATS = %w[year month day hour minute second].freeze
+
   TIME_FORMAT_MAP = {
     'year' => '%Y',
     'month' => '%m',
@@ -10,11 +12,27 @@ class TimeFormatter
     'minute' => '%M',
     'second' => '%S'
   }.freeze
-  def self.format(formats, time = Time.now)
 
+  attr_reader :formats, :wrong_formats, :time_string
+
+  def initialize(format, time = Time.now)
+    @formats = format.split(',')
+    @time = time
+    @wrong_formats = []
+    @time_string = nil
+  end
+
+  def call
+    @wrong_formats = @formats - VALID_FORMATS
+    return unless valid?
 
     format_string = formats.map { |format| TIME_FORMAT_MAP[format] }.join('-')
-    puts format_string
-    time.strftime(format_string)
+    @time_string = @time.strftime(format_string)
+
   end
+
+  def valid?
+    wrong_formats.empty?
+  end
+
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rack'
 require './time_formatter'
 class TimeApp
@@ -11,29 +13,24 @@ class TimeApp
       build_response(404, 'Not Found')
     end
   end
+
   private
+
   def handle_time_request(request)
-    format_param = request.params['format']
-    return respond_with_missing_format_error unless format_param
+    format_params = request.params['format']
 
-    formats = format_param.split(',')
-    unknown_formats = formats - VALID_FORMATS
-    return respond_with_error(unknown_formats) if unknown_formats.any?
+    if format_params.nil? || format_params.empty?
+      return build_response(400, 'Format parameter is required')
+    end
 
-    respond_with_formatted_time(formats)
-  end
+    tf = TimeFormatter.new(format_params)
+    tf.call
 
-  def respond_with_missing_format_error
-    build_response(400, 'Format parameter is required')
-  end
-
-  def respond_with_error(unknown_formats)
-    build_response(400, "Unknown time format [#{unknown_formats.join(', ')}]")
-  end
-
-  def respond_with_formatted_time(formats)
-    formatted_time = TimeFormatter.format(formats)
-    build_response(200, formatted_time)
+    if tf.valid?
+      build_response(200, tf.time_string)
+    else
+      build_response(400, "Unknown time format [#{tf.wrong_formats.join(', ')}]")
+    end
   end
 
   def build_response(status, body)
@@ -43,5 +40,4 @@ class TimeApp
     response.write(body)
     response.finish
   end
-
 end

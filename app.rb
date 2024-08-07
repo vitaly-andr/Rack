@@ -47,22 +47,19 @@ class TimeApp
     # end
   # end
 
-  def format_time(format)
-    current_time = Time.now
-    case format
-    when 'year'
-      current_time.year.to_s
-    when 'month'
-      current_time.month.to_s.rjust(2, '0') # rjust добавляет ведущий ноль для месяцев с одной цифрой
-    when 'day'
-      current_time.day.to_s.rjust(2, '0')   # rjust добавляет ведущий ноль для дней с одной цифрой
-    when 'hour'
-      current_time.hour.to_s.rjust(2, '0')
-    when 'minute'
-      current_time.min.to_s.rjust(2, '0')
-    when 'second'
-      current_time.sec.to_s.rjust(2, '0')
-    end
+  def format_time(formats)
+    time_format_map = {
+      'year' => '%Y',
+      'month' => '%m',
+      'day' => '%d',
+      'hour' => '%H',
+      'minute' => '%M',
+      'second' => '%S'
+    }
+
+    format_string = formats.map { |format| time_format_map[format] }.join('-')
+
+    Time.now.strftime(format_string)
   end
 
 end

@@ -1,5 +1,5 @@
 require 'rack'
-
+require './time_formatter'
 class TimeApp
   VALID_FORMATS = %w[year month day hour minute second].freeze
   def call(env)
@@ -8,7 +8,7 @@ class TimeApp
     if request.path_info == '/time'
       handle_time_request(request)
     else
-      [404, { 'Content-Type' => 'text/plain' }, ['Not Found']]
+      build_response(404, 'Not Found')
     end
   end
   private
@@ -24,42 +24,24 @@ class TimeApp
   end
 
   def respond_with_missing_format_error
-    [400, { 'Content-Type' => 'text/plain' }, ['Format parameter is required']]
+    build_response(400, 'Format parameter is required')
   end
 
   def respond_with_error(unknown_formats)
-    [400, { 'Content-Type' => 'text/plain' }, ["Unknown time format [#{unknown_formats.join(', ')}]"]]
+    build_response(400, "Unknown time format [#{unknown_formats.join(', ')}]")
   end
 
   def respond_with_formatted_time(formats)
-    formatted_time = format_time(formats)
-    [200, { 'Content-Type' => 'text/plain' }, [formatted_time]]
+    formatted_time = TimeFormatter.format(formats)
+    build_response(200, formatted_time)
   end
 
-    # if unknown_formats.any?
-    #     [400, { 'Content-Type' => 'text/plain' }, ["Unknown time format [#{unknown_formats.join(', ')}]"]]
-    #   else
-    #     formatted_time = formats.map { |format| format_time(format) }.join('-')
-    #     [200, { 'Content-Type' => 'text/plain' }, [formatted_time]]
-    #   end
-    # else
-    #   [400, { 'Content-Type' => 'text/plain' }, ['Format parameter is required']]
-    # end
-  # end
-
-  def format_time(formats)
-    time_format_map = {
-      'year' => '%Y',
-      'month' => '%m',
-      'day' => '%d',
-      'hour' => '%H',
-      'minute' => '%M',
-      'second' => '%S'
-    }
-
-    format_string = formats.map { |format| time_format_map[format] }.join('-')
-    puts format_string
-    Time.now.strftime(format_string)
+  def build_response(status, body)
+    response = Rack::Response.new
+    response.status = status
+    response['Content-Type'] = 'text/plain'
+    response.write(body)
+    response.finish
   end
 
 end

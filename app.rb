@@ -32,7 +32,7 @@ class TimeApp
   end
 
   def respond_with_formatted_time(formats)
-    formatted_time = formats.map { |format| format_time(format) }.join('-')
+    formatted_time = format_time(formats)
     [200, { 'Content-Type' => 'text/plain' }, [formatted_time]]
   end
 
@@ -58,7 +58,7 @@ class TimeApp
     }
 
     format_string = formats.map { |format| time_format_map[format] }.join('-')
-
+    puts format_string
     Time.now.strftime(format_string)
   end
 

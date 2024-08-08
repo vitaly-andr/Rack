@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class TimeFormatter
-
   VALID_FORMATS = %w[year month day hour minute second].freeze
 
   TIME_FORMAT_MAP = {
@@ -24,15 +23,11 @@ class TimeFormatter
 
   def call
     @wrong_formats = @formats - VALID_FORMATS
-    return unless valid?
-
     format_string = formats.map { |format| TIME_FORMAT_MAP[format] }.join('-')
     @time_string = @time.strftime(format_string)
-
   end
 
   def valid?
     wrong_formats.empty?
   end
-
 end
